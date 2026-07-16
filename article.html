@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Le Duong Cashew news and market intelligence.">
+  <title>News Article | Le Duong Cashew</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="utility"><span>Vietnam-origin cashew kernels · Manufacturer & exporter</span><span>sales@leduongcashew.com · Worldwide delivery</span></div>
+  <header class="header">
+    <a class="brand" href="index.html" aria-label="Le Duong Cashew home"><span class="brand-icon"><img src="assets/logo-light.jpg" alt=""></span><span class="brand-name"><strong>LE DUONG</strong><small>CASHEW</small></span></a>
+    <nav class="nav" aria-label="Main navigation"><a href="index.html#products">Products</a><a href="index.html#quality">Quality</a><a href="index.html#story">Our Story</a><a href="index.html#order">How to Order</a><a href="news.html">News</a><a href="index.html#contact">Contact</a></nav>
+    <a class="btn btn-primary btn-small" href="index.html#contact">Request a Quote <span>→</span></a>
+    <details class="mobile-menu"><summary aria-label="Open menu">☰</summary><div><a href="index.html#products">Products</a><a href="index.html#quality">Quality</a><a href="index.html#story">Our Story</a><a href="index.html#order">How to Order</a><a href="news.html">News</a><a href="index.html#contact">Contact</a></div></details>
+  </header>
+  <main>
+    <article class="static-article" id="article" aria-live="polite">
+      <div class="article-container">
+        <nav class="article-crumb"><a href="news.html">News</a><span>›</span><span id="article-category">Article</span></nav>
+        <header class="static-article-head"><p class="eyebrow" id="article-meta">LE DUONG CASHEW INTELLIGENCE</p><h1 id="article-title">Loading article…</h1><p id="article-lead"></p></header>
+        <div class="static-article-layout">
+          <div class="static-article-body" id="article-body"><p>Loading the preserved content record.</p></div>
+          <aside class="static-article-side"><span>Published</span><strong id="article-date">—</strong><span>Category</span><strong id="article-side-category">—</strong><span>Storage</span><strong>New content archive</strong><a class="btn btn-outline" href="news.html">Back to all news</a></aside>
+        </div>
+      </div>
+    </article>
+  </main>
+  <footer><div><a class="brand footer-brand" href="index.html"><span class="brand-icon"><img src="assets/logo-dark.jpg" alt=""></span><span class="brand-name"><strong>LE DUONG</strong><small>CASHEW</small></span></a><p>Built on Heart, Trusted Always.</p></div><div><b>CONTACT</b><a href="https://wa.me/84886106677">+84 886 10 66 77</a><a href="mailto:sales@leduongcashew.com">sales@leduongcashew.com</a><span>Dong Nai, Vietnam</span></div><div><b>COMPANY</b><span>LE DUONG CASHEW CO., LTD</span><span>Business license: 0318160855</span><span>Manufacturer & exporter</span></div><small>© 2026 Le Duong Cashew Co., Ltd.</small></footer>
+  <a class="floating-wa" href="https://wa.me/84886106677" target="_blank" aria-label="Quick quote on WhatsApp"><span>WA</span><strong>Quick quote</strong></a>
+  <script>
+    const slug=new URLSearchParams(location.search).get('slug');
+    const text=(id,value)=>document.getElementById(id).textContent=value||'';
+    fetch('data/content.json').then(response=>response.json()).then(database=>{
+      const article=database.items.find(item=>item.slug===slug);
+      if(!article) throw new Error('Article not found');
+      document.title=`${article.title} | Le Duong Cashew`;
+      text('article-title',article.title);text('article-category',article.category);text('article-side-category',article.category);text('article-date',article.date);text('article-meta',`${article.category} · ${article.date}`);text('article-lead',article.excerpt||'This legacy article record has been preserved in the new Le Duong Cashew content archive.');
+      document.getElementById('article-body').innerHTML=article.excerpt?`<p>${article.excerpt}</p>`:'<p>The title, publication date, category, original address and migration status of this article are now stored independently in the new website.</p><aside class="record-note"><strong>Original body pending source backup</strong><p>The old server is currently unavailable. The full long-form article body will be attached as soon as the WordPress export or hosting backup is supplied.</p></aside>';
+    }).catch(()=>{text('article-title','Article not found');text('article-lead','Return to the complete archive to continue browsing.');document.getElementById('article-body').innerHTML='<p>This content record could not be loaded.</p>'});
+  </script>
+</body>
+</html>
