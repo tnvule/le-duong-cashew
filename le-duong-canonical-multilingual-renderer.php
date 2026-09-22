@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Le Duong Canonical Multilingual Renderer
- * Description: Canonical EN-structure renderer for multilingual Le Duong public pages. v0.1.1 provides admin-only Products previews and makes no live-route changes.
- * Version: 0.1.1
+ * Description: Canonical EN-structure renderer for multilingual Le Duong public pages. v0.1.2 provides admin-only Products previews and makes no live-route changes.
+ * Version: 0.1.2
  * Author: Le Duong Cashew
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'LDCMR_VERSION', '0.1.1' );
+define( 'LDCMR_VERSION', '0.1.2' );
 
 function ldcmr_preview_locales() {
 	return array( 'en', 'zh', 'ar', 'tr', 'th', 'fr', 'es', 'de', 'ja', 'ko' );
@@ -102,6 +102,26 @@ function ldcmr_quote_label( $lang ) {
 	return isset( $map[ $lang ] ) ? $map[ $lang ] : $map['en'];
 }
 
+function ldcmr_availability_note( $lang ) {
+	$map = array(
+		'zh' => '最终供应情况与验收标准以报价、买方批准的规格、样品及该批次商业文件为准。',
+		'ar' => 'يتم تأكيد التوفر النهائي ومعايير القبول في عرض السعر والمواصفة المعتمدة من المشتري والعينة والمستندات التجارية الخاصة بالشحنة.',
+		'tr' => 'Nihai mevcudiyet ve kabul kriterleri teklif, alıcı onaylı şartname, numune ve sevkiyata ait ticari belgelerde teyit edilir.',
+		'th' => 'ความพร้อมขั้นสุดท้ายและเกณฑ์การยอมรับจะยืนยันในใบเสนอราคา ข้อกำหนดที่ผู้ซื้ออนุมัติ ตัวอย่าง และเอกสารการค้าสำหรับการจัดส่ง',
+	);
+	return isset( $map[$lang] ) ? $map[$lang] : '';
+}
+
+function ldcmr_flow_copy( $lang ) {
+	$map = array(
+		'zh' => array('先查看相关越南腰果仁产品页面，比较用途和需确认事项，然后查看我们的 ','质量文件和产品规格','。','订购流程',' 说明等级、包装、报价、质量检查、文件和装柜如何协调。为获得准确的商业报价，请通过 ','Le Duong B2B 报价平台',' 提交等级、数量、包装、目的港和目标装运时间。'),
+		'ar' => array('ابدأ بصفحة حبات الكاجو الفيتنامي المناسبة، وقارن الاستخدام ونقاط التأكيد، ثم راجع ','مستندات الجودة ومواصفات المنتج',' الخاصة بنا. تشرح ','عملية الطلب',' كيفية تنسيق الدرجة والتعبئة وعرض السعر وفحوص الجودة والمستندات والتحميل. للحصول على عرض تجاري دقيق، استخدم ','منصة Le Duong B2B',' لإرسال الدرجة والكمية والتعبئة وميناء الوصول وموعد الشحن المستهدف.'),
+		'tr' => array('İlgili Vietnam kaju çekirdeği sayfasından başlayın, kullanım ve teyit noktalarını karşılaştırın, ardından ','kalite belgeleri ve ürün şartnamelerimizi',' inceleyin. ','Sipariş süreci',' kalite, ambalaj, teklif, kalite kontrolleri, belgeler ve yüklemenin nasıl koordine edildiğini açıklar. Doğru bir ticari teklif için ','Le Duong B2B Teklif platformunu',' kullanarak kalite, miktar, ambalaj, varış limanı ve hedef sevkiyat dönemini paylaşın.'),
+		'th' => array('เริ่มจากหน้าผลิตภัณฑ์เม็ดมะม่วงหิมพานต์เวียดนามที่เกี่ยวข้อง เปรียบเทียบการใช้งานและประเด็นที่ต้องยืนยัน แล้วตรวจสอบ ','เอกสารคุณภาพและข้อกำหนดผลิตภัณฑ์',' ของเรา ','ขั้นตอนการสั่งซื้อ',' อธิบายการประสานเกรด บรรจุภัณฑ์ ใบเสนอราคา การตรวจคุณภาพ เอกสาร และการโหลดสินค้า สำหรับข้อเสนอทางการค้าที่แม่นยำ ให้ใช้ ','แพลตฟอร์ม B2B Quote ของ Le Duong',' เพื่อระบุเกรด ปริมาณ บรรจุภัณฑ์ ท่าเรือปลายทาง และช่วงเวลาจัดส่งเป้าหมาย'),
+	);
+	return isset( $map[$lang] ) ? $map[$lang] : array('','','','','','','');
+}
+
 function ldcmr_dom_inner_html( DOMNode $node ) {
 	$html = '';
 	foreach ( $node->childNodes as $child ) {
@@ -112,6 +132,9 @@ function ldcmr_dom_inner_html( DOMNode $node ) {
 
 function ldcmr_clean_ldx_products_main( $html, $lang ) {
 	if ( ! is_string( $html ) || '' === $html ) return '';
+	if ( 'en' !== $lang && function_exists( 'ld_catalog_clean_index_html' ) ) {
+		$html = ld_catalog_clean_index_html( $html, $lang );
+	}
 	if ( ! class_exists( 'DOMDocument' ) ) {
 		$html = preg_replace( '#<div class="ldps-story"[^>]*>.*?</div>#is', '', $html );
 		$html = preg_replace( '#<a[^>]*class="ldps-specification-link"[^>]*>.*?</a>#is', '', $html );
@@ -133,8 +156,14 @@ function ldcmr_clean_ldx_products_main( $html, $lang ) {
 	}
 
 	$quote_label = ldcmr_quote_label( $lang );
+	$canonical_codes = array();
+	if ( function_exists( 'ld_ml_deep_content' ) ) {
+		$zh_deep = ld_ml_deep_content( 'zh' );
+		foreach ( (array) ( $zh_deep['products_deep']['categories'] ?? array() ) as $cat ) $canonical_codes[] = $cat[0] ?? '';
+	}
 	$copies = $xpath->query( '//*[@class and contains(concat(" ", normalize-space(@class), " "), " product-visual-copy ")]' );
 	if ( $copies ) {
+		$copy_index = 0;
 		foreach ( $copies as $copy ) {
 			$code = '';
 			foreach ( $copy->childNodes as $child ) {
@@ -142,6 +171,15 @@ function ldcmr_clean_ldx_products_main( $html, $lang ) {
 					$code = trim( $child->textContent );
 					break;
 				}
+			}
+			if ( isset( $canonical_codes[$copy_index] ) && '' !== $canonical_codes[$copy_index] ) {
+				foreach ( $copy->childNodes as $child ) {
+					if ( XML_ELEMENT_NODE === $child->nodeType && 'span' === strtolower( $child->nodeName ) ) { $child->nodeValue = $canonical_codes[$copy_index]; $code = $canonical_codes[$copy_index]; break; }
+				}
+			}
+			if ( 'en' === $lang && in_array( $copy_index, array(0,1), true ) ) {
+				$paragraphs = $copy->getElementsByTagName('p');
+				if ( $paragraphs->length ) $paragraphs->item(0)->nodeValue = 0 === $copy_index ? 'Seven whole-white sizes offered under Orchid, Lotus, Jasmine and Daisy quality levels, subject to the approved specification.' : 'Salt-roasted cashew kernels with natural testa for wholesale, food service and selected consumer formats.';
 			}
 			$remove = array();
 			foreach ( $copy->childNodes as $child ) {
@@ -152,6 +190,7 @@ function ldcmr_clean_ldx_products_main( $html, $lang ) {
 			$a->setAttribute( 'href', ldcmr_b2b_url( $lang, ldcmr_category_for_code( $code ) ) );
 			$a->appendChild( $doc->createTextNode( $quote_label . ' →' ) );
 			$copy->appendChild( $a );
+			$copy_index++;
 		}
 	}
 
@@ -170,6 +209,8 @@ function ldcmr_clean_ldx_products_main( $html, $lang ) {
 	libxml_clear_errors();
 	libxml_use_internal_errors( $previous );
 
+	$out = preg_replace( '#https://leduongcashew\\.com/(?:fr/|es/|de/|ja/|ko/)?contact/#i', ldcmr_b2b_url( $lang ), $out );
+	$out = preg_replace( '#href="/(?:fr/|es/|de/|ja/|ko/)?contact/"#i', 'href="' . esc_url( ldcmr_b2b_url( $lang ) ) . '"', $out );
 	if ( function_exists( 'ldx_localize_links' ) && 'en' !== $lang ) {
 		$out = ldx_localize_links( $out, $lang );
 	}
@@ -231,15 +272,19 @@ function ldcmr_products_main_legacy( $lang ) {
 				<?php endforeach; ?>
 			</div>
 		</section>
-		<section class="section product-pillar" aria-labelledby="ldcmr-products-guide-<?php echo esc_attr( $lang ); ?>">
+		<section class="section product-pillar" aria-labelledby="vietnam-cashew-kernel-guide">
 			<div class="container section-heading">
 				<p class="eyebrow"><?php echo esc_html( $d['sourcing_eyebrow'] ?? '' ); ?></p>
-				<h2 id="ldcmr-products-guide-<?php echo esc_attr( $lang ); ?>"><?php echo esc_html( $d['sourcing_title'] ?? '' ); ?></h2>
+				<h2 id="vietnam-cashew-kernel-guide"><?php echo esc_html( $d['sourcing_title'] ?? '' ); ?></h2>
 				<p><?php echo esc_html( $d['sourcing_intro'] ?? '' ); ?></p>
 			</div>
 			<div class="container ld-grid">
-				<?php foreach ( (array) ( $d['sourcing_sections'] ?? array() ) as $section ) : ?>
-					<article><h3><?php echo esc_html( $section[0] ?? '' ); ?></h3><p><?php echo esc_html( $section[1] ?? '' ); ?></p></article>
+				<?php foreach ( (array) ( $d['sourcing_sections'] ?? array() ) as $index => $section ) : ?>
+					<article><h3><?php echo esc_html( $section[0] ?? '' ); ?></h3><p><?php echo esc_html( $section[1] ?? '' ); ?>
+					<?php if ( 0 === $index ) : ?> <a href="<?php echo esc_url( ldcmr_product_url($lang,'whole-white-cashew-kernels') ); ?>"><?php echo esc_html($d['categories'][0][1] ?? 'Whole White'); ?></a>, <a href="<?php echo esc_url( ldcmr_product_url($lang,'ww240-cashew-kernels') ); ?>">WW240</a> &amp; <a href="<?php echo esc_url( ldcmr_product_url($lang,'ww320-cashew-kernels') ); ?>">WW320</a>.
+					<?php elseif ( 1 === $index ) : ?> <a href="<?php echo esc_url( ldcmr_product_url($lang,'splits-and-pieces') ); ?>"><?php echo esc_html($d['categories'][9][1] ?? 'Splits & Pieces'); ?></a>.
+					<?php elseif ( 2 === $index ) : ?> <a href="<?php echo esc_url( ldcmr_product_url($lang,'unpeeled-raw-cashews') ); ?>"><?php echo esc_html($d['categories'][3][1] ?? 'Raw with testa'); ?></a>, <a href="<?php echo esc_url( ldcmr_product_url($lang,'salt-roasted-cashews') ); ?>"><?php echo esc_html($d['categories'][1][1] ?? 'Salt-roasted'); ?></a>, <a href="<?php echo esc_url( ldcmr_product_url($lang,'unsalted-roasted-cashew-kernels') ); ?>"><?php echo esc_html($d['categories'][2][1] ?? 'Unsalted roasted'); ?></a>.
+					<?php endif; ?></p></article>
 				<?php endforeach; ?>
 			</div>
 			<div class="container ld-section">
@@ -249,16 +294,20 @@ function ldcmr_products_main_legacy( $lang ) {
 						<tr><th scope="row"><?php echo esc_html( $row[0] ?? '' ); ?></th><td><?php echo esc_html( $row[1] ?? '' ); ?></td></tr>
 					<?php endforeach; ?>
 				</tbody></table></div>
+				<p class="ld-note"><?php echo esc_html( ldcmr_availability_note( $lang ) ); ?></p>
 			</div>
 			<div class="container ld-section">
-				<h2><?php echo esc_html( $d['flow_title'] ?? '' ); ?></h2><p><?php echo esc_html( $d['flow_copy'] ?? '' ); ?></p>
+				<h2><?php echo esc_html( $d['flow_title'] ?? '' ); ?></h2>
+				<?php $flow = ldcmr_flow_copy( $lang ); ?>
+				<p><?php echo esc_html($flow[0]); ?><a href="<?php echo esc_url(home_url('/'.$lang.'/certificates/')); ?>"><?php echo esc_html($flow[1]); ?></a><?php echo esc_html($flow[2]); ?><a href="<?php echo esc_url(home_url('/'.$lang.'/how-to-order/')); ?>"><?php echo esc_html($flow[3]); ?></a><?php echo esc_html($flow[4]); ?><a href="<?php echo esc_url(ldcmr_b2b_url($lang)); ?>"><?php echo esc_html($flow[5]); ?></a><?php echo esc_html($flow[6]); ?></p>
 				<div class="ld-related" aria-label="<?php echo esc_attr( $d['flow_title'] ?? '' ); ?>">
-					<?php foreach ( array( array(0,'whole-white-cashew-kernels'), array(9,'splits-and-pieces'), array(2,'unsalted-roasted-cashew-kernels') ) as $pair ) :
-						$label = $d['categories'][ $pair[0] ][1] ?? $pair[1]; ?>
-						<a href="<?php echo esc_url( ldcmr_product_url( $lang, $pair[1] ) ); ?>"><?php echo esc_html( $label ); ?> <span>→</span></a>
-					<?php endforeach; ?>
-					<a href="<?php echo esc_url( home_url( '/' . $lang . '/certificates/' ) ); ?>"><?php echo esc_html( $nav['certificates'] ?? 'Certificates' ); ?> <span>→</span></a>
-					<a href="<?php echo esc_url( ldcmr_b2b_url( $lang ) ); ?>"><?php echo esc_html( $quote_label ); ?> <span>→</span></a>
+					<a href="<?php echo esc_url(ldcmr_product_url($lang,'whole-white-cashew-kernels')); ?>"><?php echo esc_html($d['categories'][0][1] ?? 'Whole White'); ?> <span>→</span></a>
+					<a href="<?php echo esc_url(ldcmr_product_url($lang,'ww240-cashew-kernels')); ?>">WW240 <span>→</span></a>
+					<a href="<?php echo esc_url(ldcmr_product_url($lang,'ww320-cashew-kernels')); ?>">WW320 <span>→</span></a>
+					<a href="<?php echo esc_url(ldcmr_product_url($lang,'splits-and-pieces')); ?>"><?php echo esc_html($d['categories'][9][1] ?? 'Splits & Pieces'); ?> <span>→</span></a>
+					<a href="<?php echo esc_url(ldcmr_product_url($lang,'unsalted-roasted-cashew-kernels')); ?>"><?php echo esc_html($d['categories'][2][1] ?? 'Unsalted Roasted'); ?> <span>→</span></a>
+					<a href="<?php echo esc_url(home_url('/'.$lang.'/certificates/')); ?>"><?php echo esc_html($nav['certificates'] ?? 'Certificates'); ?> <span>→</span></a>
+					<a href="<?php echo esc_url(ldcmr_b2b_url($lang)); ?>"><?php echo esc_html($quote_label); ?> <span>→</span></a>
 				</div>
 			</div>
 		</section>
